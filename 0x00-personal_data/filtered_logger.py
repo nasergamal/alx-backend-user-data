@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-data filtration
+data filtration and logging
 """
 import logging
 import mysql.connector
@@ -24,8 +24,8 @@ def filter_datum(fields: List[str], redaction: str,
 
 
 def get_logger() -> logging.Logger:
-    '''return logging.log object'''
-    logger = logging.Logger('user_data')
+    '''return logging.logger object'''
+    logger = logging.getLogger('user_data')
     logger.setLevel(logging.INFO)
     logger.propagate = False
     handle = logging.StreamHandler()
@@ -36,10 +36,10 @@ def get_logger() -> logging.Logger:
 
 def get_db() -> mysql.connector.connection.MySQLConnection:
     '''set up db connection'''
-    return mysql.connector.connect(
-            host=os.environ.get('PERSONAL_DATA_DB_HOST', 'root'),
-            user=os.environ.get('PERSONAL_DATA_DB_USERNAME'),
-            password=os.environ.get('PERSONAL_DATA_DB_PASSWORD'),
+    return mysql.connector.connection.MySQLConnection(
+            host=os.environ.get('PERSONAL_DATA_DB_HOST', 'localhost'),
+            user=os.environ.get('PERSONAL_DATA_DB_USERNAME', 'root'),
+            password=os.environ.get('PERSONAL_DATA_DB_PASSWORD', ""),
             database=os.environ.get('PERSONAL_DATA_DB_NAME')
             )
 
@@ -67,10 +67,12 @@ class RedactingFormatter(logging.Formatter):
     SEPARATOR = ";"
 
     def __init__(self, fields: List[str]):
+        '''formatter init'''
         super(RedactingFormatter, self).__init__(self.FORMAT)
         self.fields = fields
 
     def format(self, record: logging.LogRecord) -> str:
+        ''' format and filter text'''
         record.msg = filter_datum(self.fields, self.REDACTION,
                                   record.getMessage(), self.SEPARATOR)
         return super().format(record)
