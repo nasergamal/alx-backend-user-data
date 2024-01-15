@@ -2,6 +2,7 @@
 '''Authentication Class'''
 from flask import request
 from typing import TypeVar, List
+import re
 
 
 class Auth:
@@ -10,8 +11,12 @@ class Auth:
         '''check of page require authentication'''
         if path and not path.endswith('/'):
             path = path + '/'
-        if (not path or not excluded_paths or
-                path not in excluded_paths):
+        if (not path or not excluded_paths):
+            return True
+        if path not in excluded_paths:
+            for excluded in excluded_paths:
+                if re.match(excluded, path):
+                    return False
             return True
         return False
 

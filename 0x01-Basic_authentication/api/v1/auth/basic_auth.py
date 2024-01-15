@@ -35,8 +35,10 @@ class BasicAuth(Auth):
                 type(decoded_base64_authorization_header) != str or
                 ':' not in decoded_base64_authorization_header):
             return (None, None)
-        cred = decoded_base64_authorization_header.split(':')
-        return tuple(cred)
+        sep = decoded_base64_authorization_header.find(':')
+        cred = (decoded_base64_authorization_header[:sep],
+                decoded_base64_authorization_header[sep + 1:])
+        return cred
 
     def user_object_from_credentials(self, user_email: str, user_pwd: str
                                      ) -> TypeVar('User'):
@@ -48,8 +50,9 @@ class BasicAuth(Auth):
         res = user.search({'email': user_email})
         if not res:
             return None
-        if res[0].is_valid_password(user_pwd):
-            return res[0]
+        for result in res:
+            if result.is_valid_password(user_pwd):
+                return result
         return None
 
     def current_user(self, request=None) -> TypeVar('User'):
