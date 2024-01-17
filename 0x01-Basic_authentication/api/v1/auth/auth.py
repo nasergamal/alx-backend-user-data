@@ -2,7 +2,6 @@
 '''Authentication Class'''
 from flask import request
 from typing import TypeVar, List
-import re
 
 
 class Auth:
@@ -15,7 +14,7 @@ class Auth:
             return True
         if path not in excluded_paths:
             for excluded in excluded_paths:
-                if re.match(excluded, path):
+                if excluded.endswith('*') and excluded[:-1] in path:
                     return False
             return True
         return False
