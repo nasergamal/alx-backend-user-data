@@ -2,13 +2,14 @@
 '''authentication methods'''
 import bcrypt
 from db import DB
-from sqlalchemy.exc import InvalidRequestError, NoResultFound
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
 from typing import Optional
 from user import User
 from uuid import uuid4
 
 
-def _hash_password(password: str):
+def _hash_password(password: str) -> bytes:
     '''hash given password using bcrypt'''
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
@@ -82,7 +83,7 @@ class Auth:
         except NoResultFound:
             raise ValueError
 
-    def reset_password(self, reset_token: str, password: str):
+    def update_password(self, reset_token: str, password: str):
         '''reset password'''
         try:
             user = self._db.find_user_by(reset_token=reset_token)

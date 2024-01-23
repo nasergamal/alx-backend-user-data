@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''flask app'''
 from flask import Flask, jsonify, request, abort, redirect, url_for
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.orm.exc import NoResultFound
 from auth import Auth
 
 app = Flask(__name__)
@@ -44,7 +44,6 @@ def login() -> str:
 def logout():
     '''user logout'''
     id = request.cookies.get('session_id')
-    print(id)
     user = AUTH.get_user_from_session_id(id)
     if not user:
         abort(403)
@@ -80,7 +79,7 @@ def update_password():
     reset_token = request.form.get('reset_token')
     pwd = request.form.get('new_password')
     try:
-        AUTH.reset_password(reset_token, pwd)
+        AUTH.update_password(reset_token, pwd)
         return jsonify({'email': email, "message": "Password updated"})
     except ValueError:
         abort(403)
